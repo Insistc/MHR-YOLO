@@ -1,0 +1,182 @@
+# MHR-YOLO (YOLO11n backbone with DP-MoE, DOHR, and CB-RPL) for FCIDD (4 classes)
+nc: 4
+scale: n
+criterion: mhr
+nwd_constant: 12.8
+nwd_weight: 0.5
+moe_aux_gain: 1.5
+cb_rpl_gain: 0.05
+cb_rpl_temperature: 0.1
+cb_rpl_ema_momentum: 0.95
+scales:
+  n:
+  - 0.5
+  - 0.25
+  - 1024
+  s:
+  - 0.5
+  - 0.5
+  - 1024
+  m:
+  - 0.5
+  - 1.0
+  - 512
+  l:
+  - 1.0
+  - 1.0
+  - 512
+  x:
+  - 1.0
+  - 1.5
+  - 512
+backbone:
+- - -1
+  - 1
+  - Conv
+  - - 64
+    - 3
+    - 2
+- - -1
+  - 1
+  - Conv
+  - - 128
+    - 3
+    - 2
+- - -1
+  - 2
+  - C3k2
+  - - 256
+    - false
+    - 0.25
+- - -1
+  - 1
+  - Conv
+  - - 256
+    - 3
+    - 2
+- - -1
+  - 2
+  - C3k2
+  - - 512
+    - false
+    - 0.25
+- - -1
+  - 1
+  - DP_MoE
+  - - 512
+    - 4
+    - 2
+    - 1.5
+    - 0.5
+    - 30
+- - -1
+  - 1
+  - Conv
+  - - 512
+    - 3
+    - 2
+- - -1
+  - 2
+  - C3k2
+  - - 512
+    - true
+- - -1
+  - 1
+  - DP_MoE
+  - - 512
+    - 4
+    - 2
+    - 1.5
+    - 0.5
+    - 30
+- - -1
+  - 1
+  - Conv
+  - - 1024
+    - 3
+    - 2
+- - -1
+  - 2
+  - C3k2
+  - - 1024
+    - true
+- - -1
+  - 1
+  - SPPF
+  - - 1024
+    - 5
+- - -1
+  - 2
+  - C2PSA
+  - - 1024
+head:
+- - -1
+  - 1
+  - nn.Upsample
+  - - null
+    - 2
+    - nearest
+- - - -1
+    - 8
+  - 1
+  - Concat
+  - - 1
+- - -1
+  - 2
+  - C3k2
+  - - 512
+    - false
+- - -1
+  - 1
+  - nn.Upsample
+  - - null
+    - 2
+    - nearest
+- - - -1
+    - 5
+  - 1
+  - Concat
+  - - 1
+- - -1
+  - 2
+  - C3k2
+  - - 256
+    - false
+- - -1
+  - 1
+  - Conv
+  - - 256
+    - 3
+    - 2
+- - - -1
+    - 15
+  - 1
+  - Concat
+  - - 1
+- - -1
+  - 2
+  - C3k2
+  - - 512
+    - false
+- - -1
+  - 1
+  - Conv
+  - - 512
+    - 3
+    - 2
+- - - -1
+    - 12
+  - 1
+  - Concat
+  - - 1
+- - -1
+  - 2
+  - C3k2
+  - - 1024
+    - true
+- - - 18
+    - 21
+    - 24
+  - 1
+  - CBRPLDetect
+  - - nc

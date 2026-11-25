@@ -1,0 +1,3 @@
+# Installs dependencies of the upstream distribution. The scripts explicitly
+# prioritize the bundled modified ultralytics source, not the PyPI implementation.
+ultralytics==8.4.21
